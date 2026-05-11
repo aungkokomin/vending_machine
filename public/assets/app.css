@@ -1,0 +1,165 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #1d2939;
+  background: #f6f7f9;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: #0f766e;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #d0d5dd;
+}
+
+.brand {
+  color: #111827;
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+nav,
+.actions,
+.inline-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.container {
+  width: min(1120px, calc(100% - 32px));
+  margin: 32px auto;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.narrow {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.form,
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+input,
+textarea,
+button,
+.button {
+  border: 1px solid #98a2b3;
+  border-radius: 6px;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+button,
+.button {
+  width: fit-content;
+  color: #ffffff;
+  background: #0f766e;
+  border-color: #0f766e;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #eaecf0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.field-error,
+.error {
+  color: #b42318;
+}
+
+.success {
+  color: #067647;
+}
+
+.pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pagination a {
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.pagination .active {
+  color: #ffffff;
+  background: #0f766e;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .page-head,
+  nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
