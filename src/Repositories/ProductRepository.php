@@ -21,7 +21,7 @@ final class ProductRepository implements ProductRepositoryInterface
         $offset = max(0, ($page - 1) * $perPage);
 
         $statement = $this->pdo->prepare(
-            "SELECT * FROM products ORDER BY {$sort} {$direction} LIMIT :limit OFFSET :offset"
+            "SELECT * FROM products WHERE deleted_at IS NULL ORDER BY {$sort} {$direction} LIMIT :limit OFFSET :offset"
         );
         $statement->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -32,12 +32,12 @@ final class ProductRepository implements ProductRepositoryInterface
 
     public function count(): int
     {
-        return (int) $this->pdo->query('SELECT COUNT(*) FROM products')->fetchColumn();
+        return (int) $this->pdo->query('SELECT COUNT(*) FROM products WHERE deleted_at IS NULL')->fetchColumn();
     }
 
     public function find(int $id): ?array
     {
-        $statement = $this->pdo->prepare('SELECT * FROM products WHERE id = :id');
+        $statement = $this->pdo->prepare('SELECT * FROM products WHERE id = :id AND deleted_at IS NULL');
         $statement->execute(['id' => $id]);
         $product = $statement->fetch();
 
@@ -62,7 +62,7 @@ final class ProductRepository implements ProductRepositoryInterface
     public function update(int $id, array $data): bool
     {
         $statement = $this->pdo->prepare(
-            'UPDATE products SET name = :name, description = :description, price = :price, quantity = :quantity WHERE id = :id'
+            'UPDATE products SET name = :name, description = :description, price = :price, quantity = :quantity WHERE id = :id AND deleted_at IS NULL'
         );
 
         return $statement->execute([
@@ -76,7 +76,7 @@ final class ProductRepository implements ProductRepositoryInterface
 
     public function delete(int $id): bool
     {
-        $statement = $this->pdo->prepare('DELETE FROM products WHERE id = :id');
+        $statement = $this->pdo->prepare('UPDATE products SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id AND deleted_at IS NULL');
 
         return $statement->execute(['id' => $id]);
     }
@@ -84,7 +84,7 @@ final class ProductRepository implements ProductRepositoryInterface
     public function decrementQuantity(int $id, int $quantity): bool
     {
         $statement = $this->pdo->prepare(
-            'UPDATE products SET quantity = quantity - :quantity WHERE id = :id AND quantity >= :input_quantity'
+            'UPDATE products SET quantity = quantity - :quantity WHERE id = :id AND quantity >= :input_quantity AND deleted_at IS NULL'
         );
         $statement->bindValue(':id', $id, PDO::PARAM_INT);
         $statement->bindValue(':quantity', $quantity, PDO::PARAM_INT);

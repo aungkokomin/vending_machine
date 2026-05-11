@@ -43,7 +43,7 @@ function sort_url(string $field, string $nextDirection): string
             <?php if (($authUser['role'] ?? null) === 'Admin'): ?>
               <a href="/products/<?= (int) $product['id'] ?>/edit">Edit</a>
               <form action="/products/<?= (int) $product['id'] ?>/delete" method="post" class="inline-form">
-                <button type="submit">Delete</button>
+                <button onclick="alert('Are you sure you want to delete this product?')" type="submit">Delete</button>
               </form>
             <?php endif; ?>
           </td>

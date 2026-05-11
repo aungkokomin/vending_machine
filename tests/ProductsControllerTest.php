@@ -94,6 +94,38 @@ final class ProductsControllerTest extends TestCase
         self::assertSame(4.5, $transactions->lastTransaction['total_amount']);
     }
 
+    public function testDestroySoftDeletesProduct(): void
+    {
+        $products = new InMemoryProductRepository([
+            ['id' => 1, 'name' => 'Water', 'description' => 'Cold', 'price' => '1.50', 'quantity' => 4],
+        ]);
+        $controller = $this->controller($products, admin: true);
+
+        $response = $controller->destroy('1');
+
+        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/products', $response->url);
+        self::assertArrayHasKey(1, $products->items);
+        self::assertNotNull($products->items[1]['deleted_at']);
+        self::assertNull($products->find(1));
+    }
+
+    public function testDeletedProductsAreExcludedFromIndex(): void
+    {
+        $products = new InMemoryProductRepository([
+            ['id' => 1, 'name' => 'Water', 'description' => 'Cold', 'price' => '1.50', 'quantity' => 4, 'deleted_at' => '2026-05-12 10:00:00'],
+            ['id' => 2, 'name' => 'Soda', 'description' => 'Cold', 'price' => '1.75', 'quantity' => 2],
+        ]);
+        $controller = $this->controller($products);
+
+        $_GET = ['page' => '1', 'sort' => 'name', 'direction' => 'ASC'];
+
+        $html = $controller->index();
+
+        self::assertStringNotContainsString('Water', $html);
+        self::assertStringContainsString('Soda', $html);
+    }
+
     private function controller(
         InMemoryProductRepository $products,
         ?InMemoryTransactionRepository $transactions = null,
@@ -168,17 +200,22 @@ final class InMemoryProductRepository implements ProductRepositoryInterface
 
     public function paginate(int $page, int $perPage, string $sort, string $direction): array
     {
-        return array_values($this->items);
+        return array_values(array_filter(
+            $this->items,
+            fn (array $item): bool => !isset($item['deleted_at']) || $item['deleted_at'] === null
+        ));
     }
 
     public function count(): int
     {
-        return count($this->items);
+        return count($this->paginate(1, 999, 'name', 'ASC'));
     }
 
     public function find(int $id): ?array
     {
-        return $this->items[$id] ?? null;
+        $item = $this->items[$id] ?? null;
+
+        return isset($item['deleted_at']) && $item['deleted_at'] !== null ? null : $item;
     }
 
     public function create(array $data): int
@@ -199,7 +236,11 @@ final class InMemoryProductRepository implements ProductRepositoryInterface
 
     public function delete(int $id): bool
     {
-        unset($this->items[$id]);
+        if (!isset($this->items[$id])) {
+            return false;
+        }
+
+        $this->items[$id]['deleted_at'] = date('Y-m-d H:i:s');
 
         return true;
     }
